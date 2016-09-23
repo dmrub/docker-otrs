@@ -53,5 +53,12 @@ RUN sed -i '/filter_module/s/#//g' /etc/httpd/conf/httpd.conf && \
     mkdir -p ${OTRS_ROOT}/var/{run,tmp}/ && \
     touch ${OTRS_ROOT}/var/tmp/firsttime
 
+# Backup original Apache configuration
+#RUN cp /etc/httpd/conf.d/zzz_otrs.conf /etc/zzz_otrs.conf.bak && \
+#    cp /etc/httpd/conf.d/welcome.conf /etc/welcome.conf.bak
+
+COPY zzz_otrs.conf /etc/httpd/conf.d/
+COPY welcome.conf /etc/httpd/conf.d/
+
 EXPOSE 80
 CMD ["/run.sh"]

@@ -33,6 +33,10 @@ DEFAULT_OTRS_CUSTOMER_LOGO_HEIGHT="50"
 DEFAULT_OTRS_CUSTOMER_LOGO_RIGHT="25"
 DEFAULT_OTRS_CUSTOMER_LOGO_TOP="2"
 DEFAULT_OTRS_CUSTOMER_LOGO_WIDTH="135"
+
+DEFAULT_OTRS_FRONTEND_WEBPATH="/otrs-web/"
+DEFAULT_OTRS_SCRIPT_ALIAS="otrs/"
+
 OTRS_BACKUP_DIR="/var/otrs/backups"
 OTRS_CONFIG_DIR="${OTRS_ROOT}/Kernel"
 OTRS_CONFIG_MOUNT_DIR="/config"
@@ -41,6 +45,11 @@ OTRS_CONFIG_MOUNT_DIR="/config"
 
 [ -z "${OTRS_DB_HOST}" ] && OTRS_DB_HOST="$DEFAULT_OTRS_DB_HOST"
 [ -z "${OTRS_DB_PORT}" ] && OTRS_DB_PORT="$DEFAULT_OTRS_DB_PORT"
+[ -z "${OTRS_FRONTEND_WEBPATH}" ] && OTRS_FRONTEND_WEBPATH="$DEFAULT_OTRS_FRONTEND_WEBPATH"
+[ -z "${OTRS_SCRIPT_ALIAS}" ] && OTRS_SCRIPT_ALIAS="$DEFAULT_OTRS_SCRIPT_ALIAS"
+
+export OTRS_SCRIPT_ALIAS_NO_TRSLASH=${OTRS_SCRIPT_ALIAS%/}
+export OTRS_FRONTEND_WEBPATH OTRS_SCRIPT_ALIAS
 
 function mysqlcmd() {
     mysql -uroot --protocol=TCP --host="${OTRS_DB_HOST}" --port="${OTRS_DB_PORT}" --password="${MYSQL_ROOT_PASSWORD}" "$@"
@@ -128,7 +137,7 @@ function copy_default_config() {
     :
 }
 
-function set_variables(){
+function set_variables() {
   [ -z "${OTRS_HOSTNAME}" ] && OTRS_HOSTNAME="otrs-`random_string`" && print_info "OTRS_HOSTNAME not set, setting hostname to '$OTRS_HOSTNAME'"
   [ -z "${OTRS_ADMIN_EMAIL}" ] && print_info "OTRS_ADMIN_EMAIL not set, setting admin email to '$DEFAULT_OTRS_ADMIN_EMAIL'" && OTRS_ADMIN_EMAIL=$DEFAULT_OTRS_ADMIN_EMAIL
   [ -z "${OTRS_ORGANIZATION}" ] && print_info "OTRS_ORGANIZATION setting organization to '$DEFAULT_OTRS_ORGANIZATION'" && OTRS_ORGANIZATION=$DEFAULT_OTRS_ORGANIZATION
@@ -166,6 +175,8 @@ function load_defaults() {
     # Add default config options
     sed -i "/#[[:space:]]*\$DIBI\$[[:space:]]*$/a\\
 \n\$Self->{'FQDN'} = '$OTRS_HOSTNAME';\
+\n\$Self->{'ScriptAlias'} = '$OTRS_SCRIPT_ALIAS';\
+\n\$Self->{'Frontend::WebPath'} = '$OTRS_FRONTEND_WEBPATH';\
 \n\$Self->{'AdminEmail'} = '$OTRS_ADMIN_EMAIL';\
 \n\$Self->{'DatabaseHost'} = '$OTRS_DB_HOST';\
 \n\$Self->{'Organization'} = '$OTRS_ORGANIZATION';\
